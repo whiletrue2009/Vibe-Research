@@ -5,7 +5,7 @@ import { useAiPage } from "../../../core/ai/pageContext";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { Disclaimer } from "@/components/ui/Disclaimer";
 import { backend, friendlyAgentError, type LocalAgentStatus, type ProductInfo } from "@/lib/backend";
-import { API_MODELS, PROVIDER_BASE, SUBSCRIPTION_MODELS, apiPresetForSaved, isCliProvider, modelNameForPreset, providerOfModel, type ProviderId } from "@/lib/ai-models";
+import { API_KEY_PLACEHOLDER, API_MODELS, PROVIDER_BASE, SUBSCRIPTION_MODELS, apiPresetForSaved, isCliProvider, modelNameForPreset, providerOfModel, type ProviderId } from "@/lib/ai-models";
 import { clearLlm, loadUserLlm, saveLlm } from "@/lib/llm";
 import { LLM_KEY } from "@/lib/llmStore";
 import { testAndSaveAi } from "@/lib/aiConnection";
@@ -141,10 +141,11 @@ export function Settings() {
     ? existing.model : (SUBSCRIPTION_MODELS[0]?.id ?? "");
   const [cliId, setCliId] = useState(existingCliId);
   const first = API_MODELS[0]!;   // 清单是编译期常量,非空
+  const firstProvider = first.provider;
   const [apiId, setApiId] = useState(apiPresetForSaved(existing));
   const [baseURL, setBaseURL] = useState(existing && !existingIsCli ? existing.baseURL : (PROVIDER_BASE[first.provider] ?? ""));
   const [modelName, setModelName] = useState(existing && !existingIsCli ? existing.model : first.id);
-  const [apiKey, setApiKey] = useState(existing && !existingIsCli ? existing.apiKey : "");
+  const [apiKey, setApiKey] = useState(existing && !existingIsCli ? existing.apiKey : (API_KEY_PLACEHOLDER[firstProvider] ?? ""));
   const [configured, setConfigured] = useState(Boolean(existing));
   const [msg, setMsg] = useState("");
   const [msgErr, setMsgErr] = useState("");
@@ -202,7 +203,9 @@ export function Settings() {
   const pickApi = (id: string) => {
     const m = API_MODELS.find((x) => x.id === id);
     if (!m) return;
-    setApiId(id); setModelName(modelNameForPreset(id)); setBaseURL(PROVIDER_BASE[m.provider] ?? "");
+    // 只为声明了固定占位 key 的本机路由预填;从这类路由切走时清掉,避免占位值被发往其它服务商。
+    const nextKey = API_KEY_PLACEHOLDER[m.provider] ?? (providerOfModel(apiId) === "cc-switch" ? "" : apiKey);
+    setApiId(id); setModelName(modelNameForPreset(id)); setBaseURL(PROVIDER_BASE[m.provider] ?? ""); setApiKey(nextKey);
     setMsg(""); setMsgErr("");
   };
 
@@ -361,7 +364,7 @@ export function Settings() {
             {mode === "api" && <Check className="ml-auto h-4 w-4 text-primary" />}
           </div>
           <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-            填自己的 key：DeepSeek / MiMo / 智谱 / Kimi / 通义 / OpenAI / 任意兼容端点。
+            填自己的 key：CC Switch / DeepSeek / MiMo / 智谱 / Kimi / 通义 / OpenAI / 任意兼容端点。
           </p>
         </button>
       </div>

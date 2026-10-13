@@ -76,6 +76,7 @@ node orchestrator/src/finance/provider_matrix.ts --provider deepseek
 | `openai-api` | `gpt-5.4` | `OPENAI_API_KEY` | v2 起改名(旧 id `openai` 停用,写了会报错指路);从 GPT-5.4 起 Chat Completions 只在推理强度 none 时能调工具;要用推理模型请改选「Codex 订阅」 |
 | `qwen` | `qwen3.8-max` | `DASHSCOPE_API_KEY` | 北京地域通用域名;key 分地域 |
 | `selfhosted` | (留空,自己填) | `SELFHOSTED_API_KEY` | Ollama 默认地址;模型必须支持 function calling |
+| `cc-switch` | `glm-5.3` | `CC_SWITCH_API_KEY` | 本机 CC Switch 路由;页面会预填 `PROXY_MANAGED`,不是订阅登录 |
 
 每家的完整说明(来源、其他模型、地域地址)见对应 JSON 里的 `notes` 与 `known_incompatibilities`。
 国产模型各自单独进矩阵,不当成同一种「OpenAI 兼容」。

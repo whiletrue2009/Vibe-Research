@@ -26,7 +26,7 @@ const base = (extra: Record<string, unknown> = {}) => ({
 
 test("产品模板:全部过 v2 契约,只描述 Chat Completions 端点,不残留旧引擎字段,不含密钥", () => {
   const ids = listProviderIds(REPO, path.join(REPO, ".local"));
-  for (const must of ["openai-api", "deepseek", "qwen", "glm", "kimi", "mimo"]) assert.ok(ids.includes(must), `缺模板 ${must}:${ids.join(",")}`);
+  for (const must of ["openai-api", "cc-switch", "deepseek", "qwen", "glm", "kimi", "mimo"]) assert.ok(ids.includes(must), `缺模板 ${must}:${ids.join(",")}`);
   for (const id of ids) {
     const raw = fs.readFileSync(path.join(REPO, "providers", `${id}.json`), "utf8");
     // 带占位符的模板 loadProviderProfile 会按设计拒绝(下一条验),这里补上占位再校验模板本身是否自洽
@@ -37,7 +37,7 @@ test("产品模板:全部过 v2 契约,只描述 Chat Completions 端点,不残�
     assert.deepEqual(legacy, [], `${id} 还留着旧引擎字段`);
     assert.doesNotMatch(profile.name, /Responses|Codex/i, `${id} 的名字还在讲旧协议`);
     assert.ok(profile.base_url, `${id} 必须给出端点地址(或带占位符的地址),不能留空`);
-    assert.match(profile.base_url!, id === "selfhosted" ? /^http:\/\/localhost:\d+\// : /^https:\/\//);
+    assert.match(profile.base_url!, id === "selfhosted" ? /^http:\/\/localhost:\d+\// : id === "cc-switch" ? /^http:\/\/127\.0\.0\.1:15721\/v1$/ : /^https:\/\//);
     assert.doesNotMatch(profile.base_url!, /\/chat\/completions\/?$/, `${id}:base_url 是根地址,请求会自己拼 /chat/completions`);
     assert.ok(profile.verified_at === null || /^\d{4}-\d{2}-\d{2}$/.test(profile.verified_at ?? ""), id);
     if (profile.direct) assert.ok(profile.direct.verified_at, `${id} 声称实测过就必须写实测日期`);

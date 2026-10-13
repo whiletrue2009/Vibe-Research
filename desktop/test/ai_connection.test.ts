@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
-import { API_MODELS, PROVIDER_BASE, SUBSCRIPTION_MODELS } from "../src/verticals/finance/lib/ai-models.ts";
+import { API_MODELS, PROVIDER_BASE, SUBSCRIPTION_MODELS, modelNameForPreset } from "../src/verticals/finance/lib/ai-models.ts";
 import { aiConnectionLabel, subscriptionConfig, testAndSaveAi } from "../src/verticals/finance/lib/aiConnection.ts";
 
 test("接入标签按来源显示，不泄露模型密钥或地址", () => {
@@ -48,11 +48,11 @@ test("API 档预设与 providers/ 模板一致：预填地址相同、模板的�
   const dir = fileURLToPath(new URL("../../providers/", import.meta.url));
   const templated = API_MODELS.filter((m) => fs.existsSync(path.join(dir, `${m.provider}.json`)));
   const providers = [...new Set(templated.map((m) => m.provider))].sort();
-  assert.deepEqual(providers, ["deepseek", "glm", "kimi", "mimo", "openai-api", "qwen"], "有模板的厂商少了一家:路径或清单不对");
+  assert.deepEqual(providers, ["cc-switch", "deepseek", "glm", "kimi", "mimo", "openai-api", "qwen"], "有模板的厂商少了一家:路径或清单不对");
   for (const pv of providers) {
     const tpl = JSON.parse(fs.readFileSync(path.join(dir, `${pv}.json`), "utf8")) as { base_url: string; default_model: string };
     assert.equal(PROVIDER_BASE[pv], tpl.base_url, `${pv} 的预填地址和模板不一致`);
-    assert.ok(templated.some((m) => m.provider === pv && m.id === tpl.default_model),
+    assert.ok(templated.some((m) => m.provider === pv && modelNameForPreset(m.id) === tpl.default_model),
       `${pv} 模板的默认模型 ${tpl.default_model} 不在页面清单里`);
   }
 });

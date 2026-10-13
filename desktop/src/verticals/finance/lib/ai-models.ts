@@ -21,7 +21,7 @@
 export type ProviderId =
   | "deepseek" | "silicon" | "openai-api" | "minimax" | "openrouter"
   | "groq" | "together" | "mimo" | "glm" | "kimi" | "qwen"
-  | "openai-compatible"
+  | "cc-switch" | "openai-compatible"
   | "cli-codex" | "cli-claude" | "cli-codebuddy";
 
 export interface ModelConfig {
@@ -52,7 +52,13 @@ export const PROVIDER_BASE: Partial<Record<ProviderId, string>> = {
   openrouter: "https://openrouter.ai/api/v1",
   groq: "https://api.groq.com/openai/v1",
   together: "https://api.together.xyz/v1",
+  "cc-switch": "http://127.0.0.1:15721/v1",
   "openai-compatible": "",
+};
+
+/** 个别本机路由用固定占位 key;不是密钥,只是让用户不必猜鉴权字段。 */
+export const API_KEY_PLACEHOLDER: Partial<Record<ProviderId, string>> = {
+  "cc-switch": "PROXY_MANAGED",
 };
 
 export const AI_MODELS: ModelConfig[] = [
@@ -75,6 +81,7 @@ export const AI_MODELS: ModelConfig[] = [
   { id: "kimi-k3", name: "Kimi K3", description: "月之暗面官方 · 默认最高推理强度，较慢", provider: "kimi" },
   { id: "qwen3.8-max", name: "通义千问 3.8 Max", description: "阿里云百炼（北京地域）", provider: "qwen" },
   { id: "gpt-5.4", name: "OpenAI GPT-5.4", description: "OpenAI 官方 · 这条线路只能用不推理的模型调工具", provider: "openai-api" },
+  { id: "cc-switch-glm-5.3", name: "CC Switch · GLM-5.3", description: "本机 CC Switch 路由 · 使用代理管理的 API key", provider: "cc-switch" },
   // —— 以下没有产品模板，按通用 OpenAI 兼容端点走 ——
   { id: "deepseek-ai/DeepSeek-V3", name: "硅基流动 · DeepSeek V3", description: "SiliconFlow 聚合", provider: "silicon" },
   { id: "MiniMax-M2", name: "MiniMax M2", description: "MiniMax 海螺", provider: "minimax" },
@@ -96,7 +103,8 @@ export function apiPresetForSaved(saved: { provider: string; model: string } | n
 }
 
 /** Model name to prefill when a preset is picked. The custom preset has no model of its own: leave it for the user. */
-export const modelNameForPreset = (id: string): string => (id === "custom" ? "" : id);
+export const modelNameForPreset = (id: string): string =>
+  id === "custom" ? "" : id === "cc-switch-glm-5.3" ? "glm-5.3" : id;
 
 export const modelById = (id: string): ModelConfig | undefined => AI_MODELS.find((m) => m.id === id);
 export const providerOfModel = (id: string): ProviderId => modelById(id)?.provider ?? "openai-compatible";

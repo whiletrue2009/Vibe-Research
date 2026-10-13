@@ -2,7 +2,7 @@
 
 本文讲清:选哪种 AI 来源、Agent 开关是什么、三家本机订阅怎么接、模型 API 怎么接与怎么验证、怎么加一家新的 provider。
 
-后端默认来源的 key 只放环境变量;浏览器里由用户填写的 key 会持久保存在当前浏览器的本机 `localStorage`,以免每次重填。`localStorage` 按地址分开:默认端口被占、启动器换了页面端口时,新地址里看不到原来的设置,要重新填一次;默认端口空出来后重启就回到原来的地址和设置。
+后端默认来源的 key 只放环境变量;浏览器里由用户填写的 key 会持久保存在当前浏览器的本机 `localStorage`,以免每次重填。
 它不是系统钥匙串,也不承诺加密,只建议在可信个人电脑使用;共享电脑用完应主动清除。
 调用时 key 随本轮请求交给本机后端,但不会写入产品配置、日志、事件账本或研究产物。
 
@@ -80,6 +80,9 @@
 「接入 AI」→「API 接入」:选厂商、填 key(需要时改 Base URL 和模型名),点「测试并保存」。
 页面先通过本机后端向所选服务发起一次真实对话,成功才保存并供全站使用;界面会标出这一家是否已用真实 key 实测。
 没有模板的服务选「其它 OpenAI 兼容端点」直接填 Base URL、key 和模型名(始终按「未实测」处理)。
+
+本机使用 CC Switch 时,选「CC Switch · GLM-5.3」预设。它会填 `http://127.0.0.1:15721/v1` 和占位 key `PROXY_MANAGED`;
+这只表示模型 API 路由,不是 Codex 订阅登录,产品不会读取 Codex CLI 的认证文件。
 
 - 端点要支持 Chat Completions 和工具调用(function calling);只支持纯对话的端点接口 direct 模式能用,页面上的对话会失败。
 - API 地址接受 HTTPS;HTTP 只允许字面主机 `localhost`、`127.0.0.1` 或 `[::1]`(可带端口和路径,如 `http://127.0.0.1:11434/v1`)。
@@ -185,7 +188,7 @@ v1 的旧引擎字段(`wire_api`、`auth_modes`、`responses_support`、`http_he
 
 - **报「后台默认 AI 来源 deepseek 需要环境变量 DEEPSEEK_API_KEY」**:密钥只从环境变量读,先 `export`。
 - **报「还没有选择 AI 来源」**:命令行研究 / 批量运行 / MCP 的 `start_research` 用后台默认;用 `--provider` 指定,或按第 3 节设后台默认。
-- **Codex 卡片提示「当前用 API key 登录」**:这张卡片只走 ChatGPT 订阅。在终端运行 `codex login` 改用 ChatGPT 登录,再点「重新检测」。
+- **Codex 卡片提示「当前用 API key 登录」**:这张卡片只走 ChatGPT 订阅。在终端运行 `codex login` 改用 ChatGPT 登录,再点「重新检测」;若你的 Codex 由本机 CC Switch 代理管理,改在「API 接入」选 CC Switch。
 - **Claude 卡片显示未登录,但 `claude` 在终端能用**:多半是 API key / Bedrock / Vertex 登录,不算 claude.ai 订阅。要用订阅请在 `claude` 里 `/login`;要用 API key 请走模型 API。
 - **WorkBuddy 显示未安装**:见第 2 节,在卡片里填位置或设 `CODEBUDDY_BIN`。
 - **报「--codex-home 已在 v2.0 移除」等**:v1 的参数一律报错并说明改法;用 `--provider` 选大脑。

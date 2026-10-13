@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { API_MODELS, apiPresetForSaved, modelNameForPreset } from "../src/verticals/finance/lib/ai-models.ts";
+import { API_MODELS, API_KEY_PLACEHOLDER, PROVIDER_BASE, apiPresetForSaved, modelNameForPreset } from "../src/verticals/finance/lib/ai-models.ts";
 import { loadUserLlm, readAiRuntime, saveUserLlm } from "../src/verticals/finance/lib/llmStore.ts";
 
 test("自定义端点保存重读后保留来源、模型及密钥，预设不按模型名串台 (#48)", () => {
@@ -24,7 +24,19 @@ test("自定义端点保存重读后保留来源、模型及密钥，预设不�
 
 test("选「其它 OpenAI 兼容端点」不把 custom 当模型名填进去，其它预设照填自己的模型名", () => {
   assert.equal(modelNameForPreset("custom"), "");
-  for (const m of API_MODELS.filter((x) => x.id !== "custom")) assert.equal(modelNameForPreset(m.id), m.id);
+  for (const m of API_MODELS.filter((x) => x.id !== "custom")) {
+    assert.equal(modelNameForPreset(m.id), m.provider === "cc-switch" ? "glm-5.3" : m.id);
+  }
+});
+
+test("CC Switch 预设使用本机固定路由和代理占位 key，不冒充订阅登录", () => {
+  assert.equal(PROVIDER_BASE["cc-switch"], "http://127.0.0.1:15721/v1");
+  assert.equal(API_KEY_PLACEHOLDER["cc-switch"], "PROXY_MANAGED");
+  const preset = API_MODELS.find((x) => x.id === "cc-switch-glm-5.3" && x.provider === "cc-switch");
+  assert.ok(preset);
+  assert.notEqual(preset.provider, "cli-codex");
+  assert.equal(modelNameForPreset(preset.id), "glm-5.3");
+  assert.equal(apiPresetForSaved({ provider: "cc-switch", model: "glm-5.3" }), preset.id);
 });
 
 test("浏览器静默丢弃写入时保存必须报错，不显示成功", () => {

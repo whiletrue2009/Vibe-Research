@@ -132,6 +132,23 @@ test("本地 HTTP 可配置;远程 HTTP 与伪装回环拒绝", () => {
   }
 });
 
+test("产品 CC Switch 模板:本机解析成模型 API;远程页面覆盖同一路由会被拒绝", () => {
+  const DATA = dataRoot();
+  const local = resolveRuntimeProvider(REPO, DATA, { provider: "cc-switch", apiKey: "PROXY_MANAGED" }, BASE_ENV);
+  if (local.runtime !== "api") throw new Error("CC Switch 应解析成模型 API");
+  assert.equal(local.api.baseURL, "http://127.0.0.1:15721/v1");
+  assert.equal(local.api.model, "glm-5.3");
+  assert.equal(local.api.envKey, "CC_SWITCH_API_KEY");
+  assert.equal(local.env.CC_SWITCH_API_KEY, "PROXY_MANAGED");
+  assert.equal(local.api.structuredOutput, "prompt");
+  assert.equal(local.api.verified, true);
+  const REMOTE = { ...BASE_ENV, VRA_REMOTE: "1" };
+  assert.equal(
+    code(() => resolveRuntimeProvider(REPO, DATA, { provider: "cc-switch", apiKey: "PROXY_MANAGED", baseURL: "http://127.0.0.1:15721/v1" }, REMOTE)),
+    "remote_base_url_forbidden",
+  );
+});
+
 test("远程访问模式:页面填的模型地址只收 https 公网域名;IP(含十进制 / 十六进制写法)、localhost、内网名字一律拒;模板自带地址与订阅不受影响", () => {
   for (const ok of ["https://api.deepseek.com", "https://api.openai.com/v1", "https://gw.example.com:8443/v1", "https://api.example.com./v1",
     "https://xn--fsqu00a.xn--0zwm56d/v1"]) {

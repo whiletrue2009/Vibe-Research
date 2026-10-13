@@ -1,0 +1,29 @@
+{
+  "id": "cc-switch",
+  "name": "CC Switch(本机路由)",
+  "base_url": "http://127.0.0.1:15721/v1",
+  "env_key": "CC_SWITCH_API_KEY",
+  "default_model": "glm-5.3",
+  "context_limit_tokens": 200000,
+  "verified_at": "2026-10-13",
+  "direct": {
+    "supported": true,
+    "structured_output": "prompt",
+    "verified_at": "2026-10-13",
+    "notes": [
+      "2026-10-13 完整兼容矩阵:核心能力 ①②③⑤⑦⑨ 与并行工具调用、长输出全部通过。",
+      "服务端不强制 JSON Schema,结构化输出按提示词降级;产物仍由产品校验把关。",
+      "不支持图片输入,资料导入里的图片 / 截图不可用;文字资料与研究流程不受影响。"
+    ]
+  },
+  "known_incompatibilities": [
+    "这是本机模型 API 模板,不是 Codex 订阅:不会读取 Codex CLI 登录态,计费与额度由 CC Switch 背后的 provider 决定。",
+    "远程访问模式下,页面里填这个回环地址会被拒绝;不要把只应在本机使用的路由暴露给远程访问者。",
+    "glm-5.3 路由不支持图片输入:资料导入里的图片 / 截图不可用,文字资料与研究流程不受影响。"
+  ],
+  "notes": [
+    "2026-10-13 在本机实测:CC Switch 监听 127.0.0.1:15721,/v1/models 返回 glm-5.2 与 glm-5.3;glm-5.3 的 /v1/chat/completions 用 PROXY_MANAGED 完成 10 项兼容矩阵。",
+    "页面选择 CC Switch 时会预填 API key=PROXY_MANAGED;如果你的路由要求另一个鉴权值,在「接入 AI」里改成自己的值。",
+    "CC Switch 也提供 Responses 路由;本产品 v2 的工具循环统一走 Chat Completions,这里选用兼容线路,不改变研究引擎协议。"
+  ]
+}
