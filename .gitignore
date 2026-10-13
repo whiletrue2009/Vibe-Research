@@ -24,3 +24,5 @@ dist/
 # 系统与日志
 .DS_Store
 *.log
+
+.idea
